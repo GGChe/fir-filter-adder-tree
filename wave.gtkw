@@ -1,0 +1,25 @@
+[*]
+[*] GTKWave Analyzer v3.3.119 (w)1999-2024 BSI
+[*] Sun Jan 25 14:01:35 2026
+[*]
+[dumpfile] "/home/darthlamprey/my_designs/fir-filter-adder-tree/wave.vcd"
+[dumpfile_mtime] "Sun Jan 25 14:00:52 2026"
+[dumpfile_size] 740797
+[savefile] "/home/darthlamprey/my_designs/fir-filter-adder-tree/wave.gtkw"
+[timestart] 0
+[size] 2502 1361
+[pos] -27 -24
+*-21.541735 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 284
+[signals_width] 206
+[sst_expanded] 1
+[sst_vpaned_height] 421
+@28
+tb_fir.clk
+tb_fir.m_axis_fir_tready
+tb_fir.m_axis_fir_tvalid
+@10421
+tb_fir.s_axis_fir_tdata[15:0]
+tb_fir.m_axis_fir_tdata[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

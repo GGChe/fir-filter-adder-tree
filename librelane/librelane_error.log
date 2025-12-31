@@ -1,0 +1,4 @@
+Usage: librelane [OPTIONS] [CONFIG_FILES]...
+Try 'librelane --help' for help.
+
+Error: No such option: --config Did you mean --override-config?
