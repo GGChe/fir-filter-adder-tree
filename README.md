@@ -1,147 +1,109 @@
 # FIR Filter with Adder Tree Optimization
 
-This repository contains the RTL implementation and verification environment for an optimized FIR filter architecture, targeting low-power and efficient VLSI designs.
-The project focuses on optimizing a classic FIR filter using techniques such as:
+## Overview
+This repository contains the RTL implementation and verification environment for an optimized FIR filter architecture, targeting low-power and efficient VLSI designs. The project focuses on optimizing a classic FIR filter using techniques such as adder-tree based accumulation, pipelining, and area-aware design decisions.
 
-- Adder-tree based accumulation
-- Pipelining and architectural restructuring
-- Clock-gating and area-aware design decisions
+For efficient resource utilization, the FIR implements an adder tree. This adder tree aims to improve latency by reducing the critical path (data arrival time and data required time). An example of the architecture is shown in the following figure.
 
-The design is written in Verilog and is ready to be:
+![FIR Filter Architecture](resources/fir_architecture.drawio.svg)
 
-- Simulated with Icarus Verilog
-- Visualized with GTKWave
-- Synthesized using OpenROAD / Nangate libraries
+## Key Features
+- Adder-tree based accumulation for balanced critical path
+- Pipelining and architectural restructuring to improve timing
+- Clock-gating and area-aware design choices for low switching activity
+- Verilog RTL with simulation and verification flows (Icarus Verilog, GTKWave, cocotb)
 
-## Repository Structure
+## Installation
 
-```
-fir-filter-adder-tree/
-├── LICENSE
-├── Makefile
-├── README.md
-├── src/
-│   ├── fir.v                  # FIR (optimized architecture)
-│   ├── tb_fir.v    # Testbench
-│   ├── filter_design.py       # FIR coefficient generation (Python)
-│   ├── synthesis.tcl          # OpenROAD synthesis script
-│   ├── constrain.sdc          # Timing constraints
-│   ├── nangate_mvt.odb        # Standard-cell library
-│   └── setup.md               # Synthesis-specific notes
-└── test_files/
-    ├── lfp/                   # Real neural signal samples
-    └── synthetic_noise/       # Synthetic test vectors
+### Install System Tools (Ubuntu / Debian)
 
-```
-## Dependencies
-Required tools (simulation)
-
-Make sure the following tools are installed:
-- Icarus Verilog (RTL simulation)
-- GTKWave (waveform visualization)
-- Make
-- Python 3 (for FIR coefficient generation)
-
-## Installation (Ubuntu / Debian)
-
-```
+```bash
 sudo apt update
-sudo apt install -y \
-    iverilog \
-    gtkwave \
-    make \
-    python3 \
-    python3-numpy \
-    python3-scipy
-pip install cocotb numpy scipy plotly
-sudo apt install iverilog gtkwave
-sudo apt install verilator
-
+sudo apt install -y iverilog gtkwave make
 ```
 
-Verify installation:
+### Setup Python Environment
 
-```
-iverilog -V
-gtkwave --version
-python3 --version
+Ensure you have Poetry installed. Then, run the following in the project root:
+
+```bash
+# Install dependencies into a virtual environment
+poetry install
+
+# Activate the virtual environment
+poetry shell
 ```
 
-## FIR Coefficient Generation (Optional)
+## FIR Coefficient Generation
 
 The FIR coefficients are generated offline using Python.
 
-To regenerate the coefficients:
+To regenerate coefficients:
 
-```
+```bash
 cd src
 python3 filter_design.py
 ```
 
-This script designs a band-pass Butterworth FIR filter with:
-- 64 taps
-- Cutoff frequencies: 5–50 Hz
-- Fixed-point scaling (Q15)
+**Notes:**
+- The script designs a band-pass FIR filter using fixed-point (Q15)
+- The number of taps and cutoff frequencies are configurable (default: 5–50 Hz)
+- If parameters are unchanged, regeneration is optional
 
-⚠️ If you do not modify the filter parameters, this step is optional.
+## Running Simulations
 
-## Running the Simulation
-### Compile RTL + Testbench
+### Verilog simulation with Iverilog & GTKWave
 
-From the root directory:
-```
-make sim
+The Verilog testbench provides cycle-accurate simulation and waveform visualization.
+The testbench is localized at `tb/verilog/tb_fir.v`. We can run the simulation with the following commands.
 
-```
-
-or manually:
-
-```
-iverilog -g2005-sv \
-    -o sim.out \
-    src/fir.v \
-    src/tb_fir_tkeo_chain.v
-```
-
-### Run the Simulation
-
-```
+```bash
+make
 vvp sim.out
-
-```
-
-This will:
-- Read input samples from test_files/
-- Process them through the FIR + TKEO chain
-- Generate a waveform file: wave.vcd
-
-### Visualize with GTKWave
-```
 gtkwave wave.vcd
 ```
 
-Recommended signals to inspect:
-- data_in
-- fir_out
-- tkeo_out
-- window_done
-- internal FIR signals (adder tree / pipeline stages)
+**Workflow:**
+1. Compile Verilog RTL and testbench with Icarus Verilog
+2. Execute simulation to generate `wave.vcd` waveform file
+3. Inspect signals in GTKWave for timing analysis, data flow verification, and adder-tree accumulation behavior
+4. Validate coefficient loading, pipeline stages, and output correctness
 
-## Test Vectors
+**Verification Scope:**
+- Clock and reset behavior
+- FIR coefficient initialization
+- Input/output data alignment across pipeline stages
+- Critical path timing and latency
 
-Two types of test signals are provided:
-- Real LFP recordings (test_files/lfp/)
-- Synthetic noise signals (test_files/synthetic_noise/)
+### cocotb Verification with Python
 
-You can switch input files directly inside the testbench:
+The cocotb testbench automates functional verification against a Python reference model. The cocotb testbenc is in `tb/cocotb/test_fir.py`. This code runs the test for different simulated signals. 
+
+```bash
+cd tb/cocotb
+make
 ```
-$fopen("test_files/lfp/...", "r");
-```
 
-# Conclusions
-Architecture is optimized for:
-- Reduced critical path
-- Lower switching activity
-- Area-aware design trade-offs
+**Workflow:**
+1. Drive Q15 fixed-point test vectors to the FIR module
+2. Capture RTL outputs and compare against Python golden reference
+3. Generate HTML reports, plots, and detailed logs
+4. Verify numerical accuracy and filter behavior across test datasets
 
-The testbench accounts for multi-cycle FIR latency
+### Test Vectors
+
+Provided datasets:
+- Real neural LFP recordings: `test_files/lfp`
+- Synthetic signals and noise: `test_files/synthetic_noise`
+
+Input files can be switched in testbench configuration.
+
+## Conclusion
+
+The FIR architecture is optimized for:
+- Reduced critical path using balanced adder trees
+- Lower switching activity through pipelining and gating
+- Area-efficient implementation suitable for neuromorphic signal processing
+
+Both Verilog and cocotb testbenches are supported for flexible verification.
+

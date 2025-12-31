@@ -4,7 +4,7 @@ module tb_fir;
 
   // Parameters
   parameter integer MAX_SAMPLES = 200000;
-  parameter integer FIR_LATENCY = 9;   // must match fir.v
+  parameter integer FIR_LATENCY = 10; 
 
   // DUT signals
   reg  clk;
@@ -41,10 +41,8 @@ module tb_fir;
 
   // Load samples from file
   initial begin
-    fd = $fopen(
-      "/home/gonsos/projects/fir-filter-adder-tree/test_files/lfp/20170224_slice02_04_CTRL2_0005_16_int_downsampled_chunk_int16.txt",
-      "r"
-    );
+    fd = $fopen("../../test_files/lfp/test_signal_20170224_16.txt", "r");
+
 
     if (fd == 0) begin
       $display("ERROR: Could not open input signal file.");
